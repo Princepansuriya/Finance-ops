@@ -36,7 +36,7 @@ pipeline {
                     sh """
                         export KUBECONFIG=$KUBECONFIG_FILE
                         kubectl apply -f k8s-deploy.yml
-                        kubectl rollout restart deployment cicd-app-deployment
+                        kubectl rollout restart deployment cicd-app
                     """
                 }
             }
