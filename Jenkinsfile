@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB = "docker.io/<your-dockerhub-username>/cicd-app"
+        DOCKERHUB = "docker.io/prince2003pansuriya/cicd-app"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-cred', url: 'https://github.com/Princepansuriya/Finance-ops.git'
+                git branch: 'main', credentialsId: 'github-cred', url: 'https://github.com/Princepansuriya/Finance-ops.git'
             }
         }
 
@@ -36,3 +36,4 @@ pipeline {
         }
     }
 }
+
