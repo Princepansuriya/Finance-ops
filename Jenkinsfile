@@ -2,10 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB = "docker.io/prince2003pansuriya/cicd-app"
+        DOCKERHUB = "prince2003pansuriya/cicd-app"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', credentialsId: 'github-cred', url: 'https://github.com/Princepansuriya/Finance-ops.git'
@@ -14,15 +15,15 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $DOCKERHUB:latest ."
+                sh 'docker build -t $DOCKERHUB:latest .'
             }
         }
 
         stage('Push Image to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
-                    sh "docker push $DOCKERHUB:latest"
+                    sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
+                    sh 'docker push $DOCKERHUB:latest ./app'
                 }
             }
         }
@@ -30,7 +31,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh "kubectl --kubeconfig=$KUBECONFIG apply -f k8s-deploy.yml"
+                    sh 'kubectl --kubeconfig=$KUBECONFIG apply -f k8s-deploy.yml'
                 }
             }
         }
