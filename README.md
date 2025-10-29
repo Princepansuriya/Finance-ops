@@ -165,7 +165,6 @@ Simple Monitoring Implementation
 
 ## CI/CD Architecture Diagram
 
-```mermaid
 flowchart LR
 A[Developer Pushes Code to GitHub] --> B[GitHub Webhook Triggers Jenkins]
 B --> C[Jenkins Pipeline]
