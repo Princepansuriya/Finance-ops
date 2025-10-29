@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cicd-app
-        image: docker.io/<your-dockerhub-username>/cicd-app:latest
+        image: docker.io/prince2003pansuriya/cicd-app:latest
         ports:
         - containerPort: 3000
 ---
