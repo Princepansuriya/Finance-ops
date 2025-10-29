@@ -2,39 +2,43 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB = "prince2003pansuriya/cicd-app"
+        IMAGE_NAME = "prince2003pansuriya/cicd-app:latest"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: 'github-cred', url: 'https://github.com/Princepansuriya/Finance-ops.git'
+                git url: 'https://github.com/Princepansuriya/Finance-ops.git', branch: 'main', credentialsId: 'github-cred'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKERHUB:latest .'
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
         stage('Push Image to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
-                    sh 'docker push $DOCKERHUB:latest ./app'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh """
+                        echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                        docker push ${IMAGE_NAME}
+                    """
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl --kubeconfig=$KUBECONFIG apply -f k8s-deploy.yml'
-                }
+                sh """
+                    kubectl apply -f k8s-deploy.yml
+                    kubectl rollout restart deployment cicd-app-deployment
+                """
             }
         }
+
     }
 }
 
