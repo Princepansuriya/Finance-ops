@@ -1,21 +1,25 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "prince2003pansuriya/cicd-app:latest"
+    parameters {
+        string(name: 'GIT_REPO', defaultValue: 'https://github.com/Princepansuriya/Finance-ops.git', description: 'Git repository URL')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+        string(name: 'IMAGE_NAME', defaultValue: 'prince2003pansuriya/cicd-app', description: 'Docker image name')
+        string(name: 'DEPLOYMENT_NAME', defaultValue: 'cicd-app', description: 'Kubernetes Deployment name')
+        string(name: 'K8S_FILE', defaultValue: 'k8s-deploy.yml', description: 'Kubernetes manifest file')
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/Princepansuriya/Finance-ops.git', branch: 'main', credentialsId: 'github-cred'
+                git url: params.GIT_REPO, branch: params.BRANCH, credentialsId: 'github-cred'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} ."
+                sh "docker build -t ${params.IMAGE_NAME}:latest ."
             }
         }
 
@@ -24,7 +28,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
                         echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
-                        docker push ${IMAGE_NAME}
+                        docker push ${params.IMAGE_NAME}:latest
                     """
                 }
             }
@@ -35,8 +39,8 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                     sh """
                         export KUBECONFIG=$KUBECONFIG_FILE
-                        kubectl apply -f k8s-deploy.yml
-                        kubectl rollout restart deployment cicd-app
+                        kubectl apply -f ${params.K8S_FILE}
+                        kubectl rollout restart deployment ${params.DEPLOYMENT_NAME}
                     """
                 }
             }
