@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-cred', url: 'https://github.com/<your_user>/<repo>.git'
+                git credentialsId: 'github-cred', url: 'https://github.com/Princepansuriya/Finance-ops.git'
             }
         }
 
